@@ -17,8 +17,7 @@ const catalogNames = [
   'xhamster',
   'eporner',
   'porntrex',
-  'missav',
-  'xvideos'
+  'missav'
 ];
 
 const catalogs = [
