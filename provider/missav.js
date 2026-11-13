@@ -24,7 +24,7 @@ class MissavProvider extends Provider {
   }
 
   getInitialUrl(catalogId) {
-    return this.baseUrl + '/dm428/en/new?sort=published_at';
+    return this.baseUrl + '/dm539/en/new?sort=published_at';
   }
 
   handleSearch({ extra: { search: keyword } }) {
