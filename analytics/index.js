@@ -7,8 +7,6 @@ const geoip = require('fast-geoip');
 const ip = require("ip");
 const { version } = require('../package.json');
 
-const analytics = new Analytics({ writeKey: process.env.WRITE_KEY });
-
 function track(event, properties) {
     (async () => {
         let geo = {};
@@ -22,18 +20,6 @@ function track(event, properties) {
             console.warn(err);
         }
 
-        analytics.track({
-            anonymousId: Math.random().toString(16).replace('0.', ''),
-            event,
-            properties: {
-                ...properties,
-                metaId: properties.id,
-                version: package.version,
-                provider: getActiveProvider(properties.id),
-                geo,
-                version
-            }
-        })
     })()
 }
 
