@@ -10,10 +10,8 @@
       "name": "genre",
       "options": [
         "New release",
-        "Uncensored leak",
         "Most viewed today",
-        "Weekly hot",
-        "Monthly hot"
+        "Weekly hot"
       ]
     },
     {

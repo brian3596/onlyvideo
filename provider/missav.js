@@ -4,19 +4,15 @@ const { meta } = require('../model');
 const Provider = require('./provider');
 
 const pathMappings = {
-  'New release': '/en/videos',
-  'Uncensored leak': '/en/uncensored',
-  'Most viewed today': '/en/today-hot',
-  'Weekly hot': '/en/weekly-hot',
-  'Monthly hot': '/en/monthly-hot',
+  'New release': '/videos',
+  'Most viewed today': '/videos?sort=popular_today',
+  'Weekly hot': '/videos?sort=popular_week',
 };
 
 class MissavProvider extends Provider {
 
   constructor() {
     super('https://javtiful.com', 'missav', 10);
-    this.dataset = {};
-    this.metas = {};
   }
 
   static create() {
@@ -24,7 +20,7 @@ class MissavProvider extends Provider {
   }
 
   getInitialUrl(catalogId) {
-    return this.baseUrl + '/en/videos';
+    return this.baseUrl + '/videos';
   }
 
   handleSearch({ extra: { search: keyword } }) {
@@ -44,21 +40,32 @@ class MissavProvider extends Provider {
   getCatalogMetas(html) {
     const metadatas = [];
     const $ = load(html);
-    //console.log("========== NEW FETCH ==========");
-    //console.log("URL:", html);
 
-    $('div.thumbnail.group')
-      .filter((_, e) => {
-        return $(e).children('div').first().children().length != 0;
-      })
+    $('.video-grid article.video-card')
       .each((index, element) => {
-        const $children = $(element).children();
+        const $article = $(element);
+        const $link = $article.find('a[href]').first();
+
+        if (!$link.length) {
+          return;
+        }
+
+        const videoPageUrl = this.baseUrl + $link.attr('href');
+        const $image = $article.find('img[data-front-lazy-src]').first();
+        const poster = this.baseUrl + $image.attr('data-front-lazy-src');
+        const imageTitle = $image.attr('alt') || '';
+        const title = imageTitle.replace(/^Thumbnail for\s*/i, '').trim()
+        || $link.attr('title')
+        || $article.find('.video-card__title').first().text().trim()
+        || $link.text().trim();
+
+        /*const $children = $(element).children();
         const $first = $children.first();
         const $last = $children.last();
         const $idPosterNode = $first.children().first();
         const poster = $idPosterNode.children('img').first().attr('data-src');
         const title = $last.text().trim();
-        const videoPageUrl = $last.children('a').attr('href');
+        const videoPageUrl = $last.children('a').attr('href');*/
 
         if (videoPageUrl) {
           metadatas.push(new meta.MetaPreview(
