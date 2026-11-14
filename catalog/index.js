@@ -32,7 +32,7 @@ const catalogs = [
   missavCatalog,
   xvideosCatalog,
   ...sxyprnCatalogs,
-  javtifulCatalog
+  javtifulCatalog,
 ];
 
 const addonEnabled = (id) => {
