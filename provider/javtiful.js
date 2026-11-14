@@ -9,14 +9,14 @@ const pathMappings = {
   'Weekly hot': '/videos?sort=popular_week',
 };
 
-class MissavProvider extends Provider {
+class JavtifulProvider extends Provider {
 
   constructor() {
-    super('https://javtiful.com', 'missav', 10);
+    super('https://javtiful.com', 'javtiful', 10);
   }
 
   static create() {
-    return new MissavProvider();
+    return new JavtifulProvider();
   }
 
   getInitialUrl(catalogId) {
@@ -125,4 +125,4 @@ class MissavProvider extends Provider {
   }
 }
 
-module.exports = MissavProvider.create;
+module.exports = JavtifulProvider.create;
