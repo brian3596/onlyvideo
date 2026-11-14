@@ -35,8 +35,13 @@ class Provider {
     
     try {
       const response = await fetch(url, {
-        "credentials": "include"
+        "credentials": "include",
+        "signal": AbortSignal.timeout(10000),
+        "cache": "no-cache",
+        "method": "GET",
+        "redirect": "follow"
       });
+      
 
       console.log("STATUS:", response.status);
       console.log("CF:", response.headers.get("cf-mitigated"));
