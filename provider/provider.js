@@ -36,11 +36,13 @@ class Provider {
     try {
       const response = await fetch(url, {
         "credentials": "include",
-        "signal": AbortSignal.timeout(10000),
-        "cache": "no-cache",
+        "signal": AbortSignal.timeout(60000),
         "method": "GET",
-        "redirect": "follow"
+        "redirect": "follow",
+        "waitUntil": "domcontentloaded"
       });
+
+      await response.waitfortimeout(5000);
       
 
       console.log("STATUS:", response.status);
