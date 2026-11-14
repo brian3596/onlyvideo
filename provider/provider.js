@@ -3,6 +3,9 @@ const m3u8 = require('m3u8-parser');
 const logger = require('../logger');
 const { event, track } = require('../analytics');
 
+const { chromium } = require("playwright");
+let browser = null;
+
 class Provider {
   static LIMIT = 50;
   static TYPE = 'movie';
@@ -30,40 +33,155 @@ class Provider {
     return new Provider('', 'default');
   }
 
+  async getBrowser() {
+    if (!browser) {
+        browser = await chromium.launch({
+            headless: true
+        });
+    }
+
+    return browser;
+  }
+
+  async closeBrowser() {
+    if (browser) {
+        await browser.close();
+        browser = null;
+    }
+  }
+
   async fetchHtml(url) {
     console.info('fetching url', url);
-    try {
-      const response = await fetch(url, {
-        redirect: "follow",
-        headers: {
-            "User-Agent":
-                "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) " +
-                "AppleWebKit/537.36 (KHTML, like Gecko) " +
-                "Chrome/131.0.0.0 Safari/537.36",
+    const browser = await this.getBrowser();
+    const context = await browser.newContext({
+        userAgent:
+            "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) " +
+            "AppleWebKit/537.36 (KHTML, like Gecko) " +
+            "Chrome/131.0.0.0 Safari/537.36",
 
+        locale: "en-US",
+
+        extraHTTPHeaders: {
             "Accept":
                 "text/html,application/xhtml+xml,application/xml;q=0.9," +
                 "image/avif,image/webp,*/*;q=0.8",
 
             "Accept-Language":
-                "en-US,en;q=0.9",
-
-            "Cache-Control": "no-cache"
-          }
+                "en-US,en;q=0.9"
+              }
       });
+      
+      const page = await context.newPage();
+
+    try {
+      /*const response = await fetch(url);
 
       console.log("STATUS:", response.status);
       console.log("CF:", response.headers.get("cf-mitigated"));
       console.log("TYPE:", response.headers.get("content-type"));
-      const html = await response.text();
-      console.log("HTML LENGTH:", html.length);
-      console.log("HTML START:", html.substring(0, 300));
-      console.log("--------------------------------");
 
-      return response.text();
+      return response.text();*/
+
+      await page.goto("https://missav.ai/", {
+            waitUntil: "domcontentloaded",
+            timeout: 60000
+        });
+
+      await page.waitForTimeout(5000);
+
+        const result = await page.evaluate(async (targetUrl) => {
+
+            try {
+                const response = await fetch(targetUrl, {
+                    method: "GET",
+                    credentials: "include",
+                    redirect: "follow",
+                    headers: {
+                        "Accept":
+                            "text/html,application/xhtml+xml," +
+                            "application/xml;q=0.9," +
+                            "image/avif,image/webp,*/*;q=0.8",
+
+                        "Accept-Language":
+                            "en-US,en;q=0.9"
+                    }
+                });
+
+                const html = await response.text();
+
+                return {
+                    ok: response.ok,
+                    status: response.status,
+                    url: response.url,
+                    contentType:
+                        response.headers.get("content-type"),
+                    cfMitigated:
+                        response.headers.get("cf-mitigated"),
+                    html
+                };
+
+            } catch (error) {
+
+                return {
+                    ok: false,
+                    status: 0,
+                    url: targetUrl,
+                    contentType: null,
+                    cfMitigated: null,
+                    html: "",
+                    error: error.message
+                };
+            }
+
+        }, url);
+
+        console.log("STATUS:", result.status);
+        console.log("FINAL URL:", result.url);
+        console.log("TYPE:", result.contentType);
+        console.log("CF:", result.cfMitigated);
+        console.log("HTML LENGTH:", result.html.length);
+
+        /*
+         * Cloudflare Challenge
+         */
+        if (
+            result.status === 403 &&
+            result.cfMitigated === "challenge"
+        ) {
+            throw new Error(
+                `Cloudflare Challenge: ${result.url}`
+            );
+        }
+
+        /*
+         * HTTP error khác
+         */
+        if (!result.ok) {
+            throw new Error(
+                `HTTP ${result.status}: ${result.url}`
+            );
+        }
+
+        /*
+         * Kiểm tra response có thực sự là HTML hay không.
+         */
+        if (
+            !result.contentType ||
+            !result.contentType.includes("text/html")
+        ) {
+            throw new Error(
+                `Response không phải HTML: ${result.contentType}`
+            );
+        }
+
+        return result.html;
+
     } catch (error) {
       console.error(error);
       return '';
+    } finally {
+      await page.close();
+      await context.close();
     }
   }
 
