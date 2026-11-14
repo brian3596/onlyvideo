@@ -17,7 +17,9 @@ const catalogNames = [
   'xhamster',
   'eporner',
   'porntrex',
-  'missav'
+  'missav',
+  'xvideos',
+  'sxyprn'
 ];
 
 const catalogs = [
@@ -25,7 +27,9 @@ const catalogs = [
   ...xhamsterCatalogs,
   ...porntrexCatalogs,
   ...spankbangCatalogs,
-  missavCatalog
+  missavCatalog,
+  xvideosCatalog,
+  ...sxyprnCatalogs
 ];
 
 const addonEnabled = (id) => {

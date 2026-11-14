@@ -8,7 +8,7 @@ const manifest = {
   id: 'org.masterchief.onlyporn',
   version: packageInfo.version,
 
-  name: 'OnlyVideo',
+  name: 'OnlyAVideo',
   description: packageInfo.description,
 
   icon: 'https://raw.githubusercontent.com/Mast3rCh1ef/addon-asset/main/op.png',

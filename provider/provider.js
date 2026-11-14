@@ -6,7 +6,7 @@ const { event, track } = require('../analytics');
 class Provider {
   static LIMIT = 50;
   static TYPE = 'movie';
-  static TRANSPORT_URL = 'https://07b88951aaab-jaxxx-v2.baby-beamup.club/manifest.json';
+  static TRANSPORT_URL = 'https://7aa0680f21e4-onlyvideo.baby-beamup.club/manifest.json';
 
   constructor(baseUrl, name, limit) {
     this.baseUrl = baseUrl;

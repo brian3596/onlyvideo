@@ -46,26 +46,22 @@ class MissavProvider extends Provider {
     const $ = load(html);
 
     $('div.thumbnail.group')
-      .filter((_, e) => {
-        return $(e).children('div').first().children().length != 0;
-      })
+      .filter((_, element) => $(element).find('div').length > 0)
       .each((index, element) => {
-        const $children = $(element).children();
-        const $first = $children.first();
+        const $card = $(element);
+        const $children = $card.children();
         const $last = $children.last();
-        const $idPosterNode = $first.children().first();
-        const poster = $idPosterNode.children('img').first().attr('data-src');
-        const title = $last.text().trim();
-        const videoPageUrl = $last.children('a').attr('href');
+        const $videoLink = $card.find('a[href]').last();
+        const $image = $card.find('img').first();
+        const videoPageUrl = $videoLink.attr('href');
 
         if (videoPageUrl) {
           metadatas.push(new meta.MetaPreview(
             videoPageUrl,
             'movie',
-            title,
-            poster,
+            $videoLink.text().trim() || $last.text().trim(),
+            $image.attr('data-src') || $image.attr('src'),
           ));
-
         }
       });
     return metadatas;
