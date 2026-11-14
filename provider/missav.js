@@ -41,130 +41,41 @@ class MissavProvider extends Provider {
     return `${prefix}page=${this.page(skip)}`;
   }
 
-  async fetchHtml(url) {
-    try {
-      const response = await fetch(url, {
-        "headers": {
-          "accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7",
-          "accept-language": "en-US,en;q=0.9",
-          "priority": "u=0, i",
-          "sec-ch-ua": "\"Chromium\";v=\"124\", \"Google Chrome\";v=\"124\", \"Not-A.Brand\";v=\"99\"",
-          "sec-ch-ua-mobile": "?0",
-          "sec-ch-ua-platform": "\"macOS\"",
-          "sec-fetch-dest": "document",
-          "sec-fetch-mode": "navigate",
-          "sec-fetch-site": "same-origin",
-          "sec-fetch-user": "?1",
-          "upgrade-insecure-requests": "1"
-        }
-      });
-      const html = await response.text();
-      const finalUrl = new URL(response.url || url);
-      finalUrl.search = '';
-      finalUrl.hash = '';
-      const details = {
-        url,
-        finalUrl: finalUrl.toString(),
-        redirected: response.redirected,
-        status: response.status,
-        ok: response.ok,
-        contentType: response.headers.get('content-type'),
-        htmlLength: html.length,
-      };
+  getCatalogMetas(html) {
+    const metadatas = [];
+    const $ = load(html);
+    console.log("========== NEW FETCH ==========");
+    console.log("URL:", html);
 
-      if (response.ok) {
-        console.info('[MissAV] response received', details);
-      } else {
-        const $body = load(html)('body');
-        $body.find('script, style, noscript').remove();
-        const responseHeaders = {};
-
-        for (const name of ['server', 'cf-ray', 'cf-mitigated', 'via', 'x-cache', 'retry-after']) {
-          const value = response.headers.get(name);
-          if (value) {
-            responseHeaders[name] = value;
-          }
-        }
-
-        console.warn('[MissAV] request returned a non-OK response', {
-          ...details,
-          responseHeaders,
-          pageTitle: load(html)('title').first().text().trim().slice(0, 160) || null,
-          bodyPreview: $body.text().replace(/\s+/g, ' ').trim().slice(0, 240) || null,
-        });
-        return '';
-      }
-
-      return html;
-    } catch (error) {
-      console.error('[MissAV] request failed', { url, error });
-      return '';
-    }
-  }
-
-  getCatalogMetas(html, url) {
-    if (!html) {
-      return [];
-    }
-
-    try {
-      const metadatas = [];
-      const $ = load(html);
-      const $candidateCards = $('div.thumbnail.group');
-      const $cards = $candidateCards.filter((_, element) => $(element).find('div').length > 0);
-
-      $cards.each((index, element) => {
-        const $card = $(element);
-        const $children = $card.children();
+    $('div.thumbnail.group')
+      .filter((_, e) => {
+        return $(e).children('div').first().children().length != 0;
+      })
+      .each((index, element) => {
+        const $children = $(element).children();
+        const $first = $children.first();
         const $last = $children.last();
-        const $videoLink = $card.find('a[href]').last();
-        const $image = $card.find('img').first();
-        const videoPageUrl = $videoLink.attr('href');
+        const $idPosterNode = $first.children().first();
+        const poster = $idPosterNode.children('img').first().attr('data-src');
+        const title = $last.text().trim();
+        const videoPageUrl = $last.children('a').attr('href');
 
         if (videoPageUrl) {
           metadatas.push(new meta.MetaPreview(
             videoPageUrl,
             'movie',
-            $videoLink.text().trim() || $last.text().trim(),
-            $image.attr('data-src') || $image.attr('src'),
+            title,
+            poster,
           ));
+
         }
       });
-
-      const details = {
-        url,
-        htmlLength: html.length,
-        candidateCardCount: $candidateCards.length,
-        cardsWithNestedDivCount: $cards.length,
-        imageCount: $('img').length,
-        linkCount: $('a[href]').length,
-        extractedCount: metadatas.length,
-      };
-
-      if (metadatas.length === 0) {
-        console.warn('[MissAV] catalog extraction returned no results', details);
-      } else {
-        console.info('[MissAV] catalog extraction succeeded', details);
-      }
-
-      return metadatas;
-    } catch (error) {
-      console.error('[MissAV] catalog extraction failed', {
-        url,
-        htmlLength: typeof html === 'string' ? html.length : null,
-        error,
-      });
-      throw error;
-    }
+    return metadatas;
   }
 
   async getMetadata(args) {
-    logger.debug({ args }, 'getMetadata');
-    const { id } = args;
-    return this.fetchHtml(id)
-      .then(html => this.parseVideoPage({ id, html }));
-    //return super.getMetadata(args)
-    //  .then(meta => meta.metaResponse);
+    return super.getMetadata(args)
+      .then(meta => meta.metaResponse);
   }
 
   parseVideoPage({ id, html }) {
