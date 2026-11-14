@@ -4,17 +4,17 @@ const { meta } = require('../model');
 const Provider = require('./provider');
 
 const pathMappings = {
-  'New release': '/dm635/en/release',
-  'Uncensored leak': '/dm817/en/uncensored-leak',
-  'Most viewed today': '/dm301/en/today-hot',
-  'Weekly hot': '/dm170/en/weekly-hot',
-  'Monthly hot': '/dm273/en/monthly-hot',
+  'New release': '/en/videos',
+  'Uncensored leak': '/en/uncensored',
+  'Most viewed today': '/en/today-hot',
+  'Weekly hot': '/en/weekly-hot',
+  'Monthly hot': '/en/monthly-hot',
 };
 
 class MissavProvider extends Provider {
 
   constructor() {
-    super('https://missav.ws', 'missav', 10);
+    super('https://javtiful.com', 'missav', 10);
     this.dataset = {};
     this.metas = {};
   }
@@ -24,7 +24,7 @@ class MissavProvider extends Provider {
   }
 
   getInitialUrl(catalogId) {
-    return this.baseUrl + '/dm539/en/new?sort=published_at';
+    return this.baseUrl + '/en/videos';
   }
 
   handleSearch({ extra: { search: keyword } }) {
