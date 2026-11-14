@@ -13,6 +13,8 @@ class JavtifulProvider extends Provider {
 
   constructor() {
     super('https://javtiful.com', 'javtiful', 10);
+    this.dataset = {};
+    this.metas = {};
   }
 
   static create() {
@@ -40,6 +42,9 @@ class JavtifulProvider extends Provider {
   getCatalogMetas(html) {
     const metadatas = [];
     const $ = load(html);
+
+    console.log("JAVTIFUL - TEST");
+    console.log($.text());
 
     $('.video-grid article.video-card')
       .each((index, element) => {
