@@ -44,7 +44,7 @@ class MissavProvider extends Provider {
   getCatalogMetas(html) {
     const metadatas = [];
     const $ = load(html);
-    console.log("========== NEW FETCH ==========");
+    //console.log("========== NEW FETCH ==========");
     //console.log("URL:", html);
 
     $('div.thumbnail.group')
