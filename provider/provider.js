@@ -108,7 +108,7 @@ class Provider {
       }
 
       const html = await this.fetchHtml(url).catch(e => '');
-      const metas = this.getCatalogMetas(html, url);
+      const metas = this.getCatalogMetas(html);
       logger.debug({ metasSize: metas.length }, 'catalog');
       return Promise.resolve({ metas });
     } else {

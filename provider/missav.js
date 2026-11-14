@@ -14,7 +14,7 @@ const pathMappings = {
 class MissavProvider extends Provider {
 
   constructor() {
-    super('https://missav.ws', 'missav', 10);
+    super('https://missav.com', 'missav', 10);
     this.dataset = {};
     this.metas = {};
   }

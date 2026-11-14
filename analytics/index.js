@@ -1,27 +1,6 @@
-require('dotenv').config()
-const { Analytics } = require('@segment/analytics-node');
 const event = require('./event');
-const package = require('../package.json');
-const { getActiveProvider } = require('../catalog');
-const geoip = require('fast-geoip');
-const ip = require("ip");
-const { version } = require('../package.json');
 
-function track(event, properties) {
-    (async () => {
-        let geo = {};
-        try {
-            properties.clientIp = properties.clientIp || ip.address();
-            if (properties.clientIp) {
-                geo = await geoip.lookup(properties.clientIp);
-            }
-        } catch (err) {
-            geo = {};
-            console.warn(err);
-        }
-
-    })()
-}
+function track() {}
 
 module.exports = {
     event,
