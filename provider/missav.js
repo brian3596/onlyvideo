@@ -68,8 +68,12 @@ class MissavProvider extends Provider {
   }
 
   async getMetadata(args) {
-    return super.getMetadata(args)
-      .then(meta => meta.metaResponse);
+    logger.debug({ args }, 'getMetadata');
+    const { id } = args;
+    return this.fetchHtml(id)
+      .then(html => this.parseVideoPage({ id, html }));
+    //return super.getMetadata(args)
+    //  .then(meta => meta.metaResponse);
   }
 
   parseVideoPage({ id, html }) {
