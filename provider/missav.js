@@ -45,8 +45,13 @@ class MissavProvider extends Provider {
     try {
       const response = await fetch(url);
       const html = await response.text();
+      const finalUrl = new URL(response.url || url);
+      finalUrl.search = '';
+      finalUrl.hash = '';
       const details = {
         url,
+        finalUrl: finalUrl.toString(),
+        redirected: response.redirected,
         status: response.status,
         ok: response.ok,
         contentType: response.headers.get('content-type'),
@@ -56,7 +61,24 @@ class MissavProvider extends Provider {
       if (response.ok) {
         console.info('[MissAV] response received', details);
       } else {
-        console.warn('[MissAV] request returned a non-OK response', details);
+        const $body = load(html)('body');
+        $body.find('script, style, noscript').remove();
+        const responseHeaders = {};
+
+        for (const name of ['server', 'cf-ray', 'cf-mitigated', 'via', 'x-cache', 'retry-after']) {
+          const value = response.headers.get(name);
+          if (value) {
+            responseHeaders[name] = value;
+          }
+        }
+
+        console.warn('[MissAV] request returned a non-OK response', {
+          ...details,
+          responseHeaders,
+          pageTitle: load(html)('title').first().text().trim().slice(0, 160) || null,
+          bodyPreview: $body.text().replace(/\s+/g, ' ').trim().slice(0, 240) || null,
+        });
+        return '';
       }
 
       return html;
@@ -67,6 +89,10 @@ class MissavProvider extends Provider {
   }
 
   getCatalogMetas(html, url) {
+    if (!html) {
+      return [];
+    }
+
     try {
       const metadatas = [];
       const $ = load(html);
