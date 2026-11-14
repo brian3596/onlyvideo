@@ -41,13 +41,39 @@ class MissavProvider extends Provider {
     return `${prefix}page=${this.page(skip)}`;
   }
 
-  getCatalogMetas(html) {
-    const metadatas = [];
-    const $ = load(html);
+  async fetchHtml(url) {
+    try {
+      const response = await fetch(url);
+      const html = await response.text();
+      const details = {
+        url,
+        status: response.status,
+        ok: response.ok,
+        contentType: response.headers.get('content-type'),
+        htmlLength: html.length,
+      };
 
-    $('div.thumbnail.group')
-      .filter((_, element) => $(element).find('div').length > 0)
-      .each((index, element) => {
+      if (response.ok) {
+        console.info('[MissAV] response received', details);
+      } else {
+        console.warn('[MissAV] request returned a non-OK response', details);
+      }
+
+      return html;
+    } catch (error) {
+      console.error('[MissAV] request failed', { url, error });
+      return '';
+    }
+  }
+
+  getCatalogMetas(html, url) {
+    try {
+      const metadatas = [];
+      const $ = load(html);
+      const $candidateCards = $('div.thumbnail.group');
+      const $cards = $candidateCards.filter((_, element) => $(element).find('div').length > 0);
+
+      $cards.each((index, element) => {
         const $card = $(element);
         const $children = $card.children();
         const $last = $children.last();
@@ -64,7 +90,32 @@ class MissavProvider extends Provider {
           ));
         }
       });
-    return metadatas;
+
+      const details = {
+        url,
+        htmlLength: html.length,
+        candidateCardCount: $candidateCards.length,
+        cardsWithNestedDivCount: $cards.length,
+        imageCount: $('img').length,
+        linkCount: $('a[href]').length,
+        extractedCount: metadatas.length,
+      };
+
+      if (metadatas.length === 0) {
+        console.warn('[MissAV] catalog extraction returned no results', details);
+      } else {
+        console.info('[MissAV] catalog extraction succeeded', details);
+      }
+
+      return metadatas;
+    } catch (error) {
+      console.error('[MissAV] catalog extraction failed', {
+        url,
+        htmlLength: typeof html === 'string' ? html.length : null,
+        error,
+      });
+      throw error;
+    }
   }
 
   async getMetadata(args) {
