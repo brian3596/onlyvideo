@@ -1,0 +1,28 @@
+{
+  "type": "movie",
+  "name": "OAV: JAVTiful",
+  "id": "javtiful",
+  "extra": [
+    {
+      "name": "search"
+    },
+    {
+      "name": "genre",
+      "options": [
+        "New release",
+        "Uncensored",
+        "Reducing",
+        "Most viewed today",
+        "Weekly hot"
+      ]
+    },
+    {
+      "name": "skip"
+    }
+  ],
+  "extraSupported": [
+    "search",
+    "genre",
+    "skip"
+  ]
+}

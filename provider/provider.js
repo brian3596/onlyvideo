@@ -34,14 +34,11 @@ class Provider {
     console.info('fetching url', url);
     
     try {
-      const response = await fetch(url, {
-        "signal": AbortSignal.timeout(60000),
-        "waitUntil": "domcontentloaded"
-      });
+      const response = await fetch(url);
 
-      console.log("STATUS:", response.status);
+      /*console.log("STATUS:", response.status);
       console.log("CF:", response.headers.get("cf-mitigated"));
-      console.log("TYPE:", response.headers.get("content-type"));
+      console.log("TYPE:", response.headers.get("content-type"));*/
 
       return response.text();
 
