@@ -45,7 +45,7 @@ class MissavProvider extends Provider {
     const metadatas = [];
     const $ = load(html);
     console.log("========== NEW FETCH ==========");
-    console.log("URL:", html);
+    //console.log("URL:", html);
 
     $('div.thumbnail.group')
       .filter((_, e) => {
